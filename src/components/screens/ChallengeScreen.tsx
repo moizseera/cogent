@@ -94,7 +94,7 @@ export function ChallengeScreen() {
           content: assistantContent,
           timestamp: Date.now(),
         });
-        addTranscript(`Narrator: ${assistantContent}`);
+        addTranscript(`Coach: ${assistantContent}`);
       }
     } catch (err) {
       console.error("Failed to start scenario:", err);
@@ -154,7 +154,7 @@ export function ChallengeScreen() {
       const conversationHistory = useAppStore
         .getState()
         .messages.map(
-          (m) => `${m.role === "user" ? "User" : "Narrator"}: ${m.content}`
+          (m) => `${m.role === "user" ? "User" : "Coach"}: ${m.content}`
         )
         .join("\n");
 
@@ -206,7 +206,7 @@ export function ChallengeScreen() {
             content: assistantContent,
             timestamp: Date.now(),
           });
-          addTranscript(`Narrator: ${assistantContent}`);
+          addTranscript(`Coach: ${assistantContent}`);
 
           const latestState = useAppStore.getState();
           if (

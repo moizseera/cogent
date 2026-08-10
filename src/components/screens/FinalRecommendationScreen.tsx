@@ -62,11 +62,11 @@ export function FinalRecommendationScreen() {
             Final step
           </div>
           <h2 className="text-2xl font-bold text-navy">
-            Your recommendation to Jane
+            Your final recommendation
           </h2>
           <p className="text-muted-foreground">
-            Based on everything you&rsquo;ve learned and decided, what is your
-            final recommendation? Tell Jane what to do, in what order, and why.
+            Based on everything you&rsquo;ve explored, what would you advise
+            your friend to do, in what order, and why?
           </p>
         </div>
 
