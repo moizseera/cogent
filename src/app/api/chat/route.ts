@@ -1,18 +1,21 @@
 import { createGroq } from "@ai-sdk/groq";
 import { streamText } from "ai";
 
-import { buildNarratorSystemPrompt } from "@/lib/prompts";
+import { buildScenarioSystemPrompt } from "@/lib/prompts";
+import { getScenario } from "@/lib/scenarios";
 
 const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: Request) {
-  const { messages, currentStep, decisionCount, conversationHistory } =
+  const { messages, scenarioId, conversationHistory, turnCount } =
     await req.json();
 
-  const systemPrompt = buildNarratorSystemPrompt(
-    currentStep || 1,
-    decisionCount || 0,
-    conversationHistory || ""
+  const scenario = getScenario(scenarioId);
+
+  const systemPrompt = buildScenarioSystemPrompt(
+    scenario,
+    conversationHistory || "",
+    turnCount || 0
   );
 
   const chatMessages =

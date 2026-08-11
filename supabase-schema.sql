@@ -1,12 +1,10 @@
--- Run this in Supabase SQL Editor to create the reports table
+-- Run this in Supabase SQL Editor to create the reports table (fresh install)
 
 create table if not exists public.reports (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references auth.users(id) on delete cascade not null,
   scenario_id text not null default 'jet-engine-claim',
   overall_score integer not null,
-  judgment_score integer not null,
-  communication_score integer not null,
   report_data jsonb not null,
   created_at timestamptz default now() not null
 );
@@ -23,3 +21,13 @@ create policy "Users can insert own reports"
 
 create index idx_reports_user_id on public.reports(user_id);
 create index idx_reports_created_at on public.reports(created_at desc);
+
+-- ============================================================
+-- MIGRATION: if you already created the reports table with the
+-- older schema (judgment_score / communication_score columns),
+-- run this instead to bring it up to date with the new report
+-- format (universal judgment engine, no per-dimension scores).
+-- ============================================================
+
+alter table public.reports drop column if exists judgment_score;
+alter table public.reports drop column if exists communication_score;

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
+import { DEFAULT_SCENARIO_ID } from "@/lib/scenarios";
 
 const PRACTICE_CARDS = [
   {
@@ -13,6 +14,7 @@ const PRACTICE_CARDS = [
     duration: "~10 min",
     skills: ["Critical evaluation", "Risk assessment", "Decision-making"],
     available: true,
+    scenarioId: DEFAULT_SCENARIO_ID,
   },
   {
     title: "The Acquisition Offer",
@@ -22,6 +24,7 @@ const PRACTICE_CARDS = [
     duration: "20-25 min",
     skills: ["Stakeholder management", "Negotiation", "Strategic thinking"],
     available: false,
+    scenarioId: "",
   },
   {
     title: "The Research Ethics Dilemma",
@@ -31,6 +34,7 @@ const PRACTICE_CARDS = [
     duration: "15-20 min",
     skills: ["Ethical reasoning", "Evidence analysis", "Communication"],
     available: false,
+    scenarioId: "",
   },
 ];
 
@@ -54,8 +58,14 @@ const LESSON_CARDS = [
 
 export function LandingScreen() {
   const setScreen = useAppStore((s) => s.setScreen);
+  const setScenarioId = useAppStore((s) => s.setScenarioId);
   const authUser = useAppStore((s) => s.authUser);
   const setAuthUser = useAppStore((s) => s.setAuthUser);
+
+  const startChallenge = (scenarioId: string) => {
+    setScenarioId(scenarioId);
+    setScreen("challenge");
+  };
 
   const handleSignIn = async () => {
     const supabase = createClient();
@@ -137,7 +147,7 @@ export function LandingScreen() {
               <Button
                 size="lg"
                 className="bg-blue hover:bg-blue-hover text-white text-base px-8 py-6 rounded-lg"
-                onClick={() => setScreen("challenge")}
+                onClick={() => startChallenge(DEFAULT_SCENARIO_ID)}
               >
                 Start a challenge
               </Button>
@@ -229,7 +239,9 @@ export function LandingScreen() {
                     ? "border-border hover:border-blue/30 hover:shadow-md cursor-pointer"
                     : "border-border/50 opacity-60"
                 }`}
-                onClick={() => card.available && setScreen("challenge")}
+                onClick={() =>
+                  card.available && startChallenge(card.scenarioId)
+                }
               >
                 <div className="flex items-center justify-between">
                   <span

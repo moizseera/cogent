@@ -4,12 +4,13 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
+import { getScenario } from "@/lib/scenarios";
 import type { ReportData } from "@/lib/types";
 
 function ScoreRing({
   score,
   max,
-  size = 80,
+  size = 100,
   label,
 }: {
   score: number;
@@ -48,7 +49,7 @@ function ScoreRing({
         />
       </svg>
       <div className="text-center -mt-[calc(50%+8px)] mb-4">
-        <div className="text-lg font-bold text-navy">{score}</div>
+        <div className="text-xl font-bold text-navy">{score}</div>
         <div className="text-[10px] text-muted-foreground">/{max}</div>
       </div>
       <div className="text-xs text-muted-foreground font-medium">{label}</div>
@@ -56,48 +57,19 @@ function ScoreRing({
   );
 }
 
-function ScoreBar({
-  label,
-  score,
-  max,
-}: {
-  label: string;
-  score: number;
-  max: number;
-}) {
-  const pct = Math.round((score / max) * 100);
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm">
-        <span>{label}</span>
-        <span className="text-muted-foreground">
-          {score}/{max}
-        </span>
-      </div>
-      <div className="h-2 bg-border rounded-full overflow-hidden">
-        <div
-          className="h-full bg-blue rounded-full transition-all duration-1000"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
 export function ReportScreen() {
   const {
     allTranscripts,
-    decisions,
     finalRecommendation,
     report,
+    scenarioId,
     setReport,
-    setScreen,
     setIsLoading,
   } = useAppStore();
 
+  const scenario = getScenario(scenarioId);
   const authUser = useAppStore((s) => s.authUser);
   const [loading, setLoading] = useState(!report);
-  const [activeSection, setActiveSection] = useState(0);
   const [saved, setSaved] = useState(false);
   const savedRef = useRef(false);
 
@@ -114,8 +86,8 @@ export function ReportScreen() {
           body: JSON.stringify({
             type: "report",
             transcripts: allTranscripts,
-            decisions,
             finalRecommendation,
+            scenarioId,
           }),
         });
         const data: ReportData = await res.json();
@@ -129,7 +101,7 @@ export function ReportScreen() {
     };
 
     fetchReport();
-  }, [allTranscripts, decisions, finalRecommendation, report, setReport, setIsLoading]);
+  }, [allTranscripts, finalRecommendation, report, scenarioId, setReport, setIsLoading]);
 
   useEffect(() => {
     if (!report || !authUser || savedRef.current) return;
@@ -138,13 +110,13 @@ export function ReportScreen() {
     fetch("/api/reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ report }),
+      body: JSON.stringify({ report, scenarioId }),
     })
       .then((res) => {
         if (res.ok) setSaved(true);
       })
       .catch(() => {});
-  }, [report, authUser]);
+  }, [report, authUser, scenarioId]);
 
   const handleSignIn = async () => {
     const supabase = createClient();
@@ -172,163 +144,86 @@ export function ReportScreen() {
 
   if (!report) return null;
 
-  const sections = [
-    "Overview",
-    "Key Decisions",
-    "Judgment",
-    "Communication",
-    "Next Steps",
-  ];
-
   return (
     <div className="min-h-dvh px-6 py-8">
-      <div className="max-w-2xl mx-auto space-y-8">
+      <div className="max-w-2xl mx-auto space-y-10">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-navy">Your Report</h1>
-          <p className="text-muted-foreground">
-            The Jet Engine Claim
+          <p className="text-muted-foreground">{scenario.title}</p>
+          <div className="flex justify-center">
+            <ScoreRing score={report.overallScore} max={100} label="Overall" />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-navy">
+            What You Did Well
+          </h2>
+          <ul className="space-y-3">
+            {report.whatYouDidWell.map((item, i) => (
+              <li
+                key={i}
+                className="flex gap-3 bg-blue-light rounded-lg p-4 text-sm leading-relaxed"
+              >
+                <span className="text-blue shrink-0">✓</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-navy">
+            What You Missed
+          </h2>
+          <ul className="space-y-3">
+            {report.whatYouMissed.map((item, i) => (
+              <li
+                key={i}
+                className="flex gap-3 bg-muted rounded-lg p-4 text-sm leading-relaxed"
+              >
+                <span className="text-muted-foreground shrink-0">−</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-navy">
+            Your Decision Path
+          </h2>
+          <ol className="space-y-3">
+            {report.decisionPath.map((step, i) => (
+              <li key={i} className="flex gap-3 text-sm leading-relaxed">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-navy text-white text-xs flex items-center justify-center">
+                  {i + 1}
+                </span>
+                <span className="pt-0.5">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-navy">
+            A Stronger Approach
+          </h2>
+          <p className="text-[15px] leading-relaxed text-muted-foreground">
+            {report.strongerApproach}
           </p>
         </div>
 
-        <div className="flex justify-center gap-6">
-          <ScoreRing
-            score={report.overallScore}
-            max={100}
-            size={100}
-            label="Overall"
-          />
-          <ScoreRing
-            score={report.judgmentScore.total}
-            max={70}
-            label="Judgment"
-          />
-          <ScoreRing
-            score={report.communicationScore.total}
-            max={30}
-            label="Communication"
-          />
-        </div>
-
-        <div className="flex gap-1 overflow-x-auto pb-1">
-          {sections.map((s, i) => (
-            <button
-              key={s}
-              onClick={() => setActiveSection(i)}
-              className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${
-                activeSection === i
-                  ? "bg-blue text-white"
-                  : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-
-        {activeSection === 0 && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-navy">
-              Scenario Summary
-            </h2>
-            <p className="text-[15px] leading-relaxed text-muted-foreground">
-              {report.scenarioSummary}
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-navy">
+            Next Practice Focus
+          </h2>
+          <div className="bg-blue-light border border-blue/20 rounded-lg p-5">
+            <p className="text-[15px] leading-relaxed">
+              {report.nextPracticeFocus}
             </p>
           </div>
-        )}
-
-        {activeSection === 1 && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-navy">
-              Key Decisions
-            </h2>
-            <div className="space-y-3">
-              {report.keyDecisions.map((kd, i) => (
-                <div key={i} className="border rounded-lg p-4 space-y-2">
-                  <p className="text-sm font-medium">{kd.decision}</p>
-                  <p className="text-sm text-muted-foreground">{kd.impact}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeSection === 2 && (
-          <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-navy">
-              Judgment Breakdown
-              <span className="text-sm font-normal text-muted-foreground ml-2">
-                {report.judgmentScore.total}/70
-              </span>
-            </h2>
-            <div className="space-y-4">
-              {report.judgmentBreakdown.map((dim) => (
-                <div key={dim.dimension} className="space-y-3">
-                  <ScoreBar
-                    label={dim.dimension}
-                    score={dim.score}
-                    max={dim.maxScore}
-                  />
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="bg-blue-light rounded-lg p-3">
-                      <div className="text-xs font-medium text-blue mb-1">
-                        What you did
-                      </div>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        {dim.whatYouDid}
-                      </p>
-                    </div>
-                    <div className="bg-muted rounded-lg p-3">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">
-                        What you missed
-                      </div>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        {dim.whatYouMissed}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeSection === 3 && (
-          <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-navy">
-              Communication Breakdown
-              <span className="text-sm font-normal text-muted-foreground ml-2">
-                {report.communicationScore.total}/30
-              </span>
-            </h2>
-            <div className="space-y-4">
-              {report.communicationBreakdown.map((aspect) => (
-                <div key={aspect.aspect} className="space-y-2">
-                  <ScoreBar
-                    label={aspect.aspect}
-                    score={aspect.score}
-                    max={aspect.maxScore}
-                  />
-                  <p className="text-sm text-muted-foreground pl-1">
-                    {aspect.observation}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeSection === 4 && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-navy">
-              What to Practise Next
-            </h2>
-            <div className="bg-blue-light border border-blue/20 rounded-lg p-5">
-              <p className="text-[15px] leading-relaxed">
-                {report.recommendation}
-              </p>
-            </div>
-          </div>
-        )}
+        </div>
 
         <div className="pt-4 space-y-3">
           {authUser ? (

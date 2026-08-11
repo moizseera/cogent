@@ -16,8 +16,6 @@ export async function POST(req: Request) {
       user_id: user.id,
       scenario_id: scenarioId || "jet-engine-claim",
       overall_score: report.overallScore,
-      judgment_score: report.judgmentScore.total,
-      communication_score: report.communicationScore.total,
       report_data: report,
     })
     .select()
@@ -40,7 +38,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("reports")
-    .select("id, scenario_id, overall_score, judgment_score, communication_score, created_at")
+    .select("id, scenario_id, overall_score, created_at")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 

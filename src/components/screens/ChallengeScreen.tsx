@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppStore } from "@/lib/store";
 import { VoiceInput } from "@/components/VoiceInput";
+import { isConvergenceSignal } from "@/lib/prompts";
+import { getScenario } from "@/lib/scenarios";
 
 interface DisplayMessage {
   id: string;
@@ -12,18 +14,13 @@ interface DisplayMessage {
   content: string;
 }
 
+const HARD_CAP_USER_TURNS = 12;
+
 export function ChallengeScreen() {
-  const {
-    messages: storeMessages,
-    decisionCount,
-    currentStep,
-    addMessage,
-    addDecision,
-    advanceStep,
-    incrementDecisionCount,
-    setScreen,
-    addTranscript,
-  } = useAppStore();
+  const { messages: storeMessages, scenarioId, addMessage, setScreen, addTranscript } =
+    useAppStore();
+
+  const scenario = getScenario(scenarioId);
 
   const [displayMessages, setDisplayMessages] = useState<DisplayMessage[]>(() =>
     storeMessages.map((m, i) => ({
@@ -35,7 +32,6 @@ export function ChallengeScreen() {
   const [textInput, setTextInput] = useState("");
   const [inputMode, setInputMode] = useState<"text" | "voice">("text");
   const [isLoading, setIsLoading] = useState(false);
-  const [hasStarted, setHasStarted] = useState(storeMessages.length > 0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const msgIdRef = useRef(storeMessages.length);
   const startedRef = useRef(storeMessages.length > 0);
@@ -46,19 +42,23 @@ export function ChallengeScreen() {
     }
   }, [displayMessages]);
 
-  const startScenario = useCallback(async () => {
-    setHasStarted(true);
-    setIsLoading(true);
+  const streamChat = useCallback(
+    async (chatMessages: { role: string; content: string }[], turnCount: number) => {
+      const conversationHistory = useAppStore
+        .getState()
+        .messages.map(
+          (m) => `${m.role === "user" ? "User" : "Scenario"}: ${m.content}`
+        )
+        .join("\n");
 
-    try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [],
-          currentStep: 1,
-          decisionCount: 0,
-          conversationHistory: "",
+          messages: chatMessages,
+          scenarioId,
+          conversationHistory,
+          turnCount,
         }),
       });
 
@@ -94,14 +94,26 @@ export function ChallengeScreen() {
           content: assistantContent,
           timestamp: Date.now(),
         });
-        addTranscript(`Coach: ${assistantContent}`);
+        addTranscript(`Scenario: ${assistantContent}`);
+
+        if (isConvergenceSignal(assistantContent) || turnCount >= HARD_CAP_USER_TURNS) {
+          setTimeout(() => setScreen("final-recommendation"), 1500);
+        }
       }
+    },
+    [addMessage, addTranscript, scenarioId, setScreen]
+  );
+
+  const startScenario = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await streamChat([], 0);
     } catch (err) {
       console.error("Failed to start scenario:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [addMessage, addTranscript]);
+  }, [streamChat]);
 
   useEffect(() => {
     if (!startedRef.current) {
@@ -128,119 +140,28 @@ export function ChallengeScreen() {
       setDisplayMessages(updatedMessages);
       setIsLoading(true);
 
-      const isDecision =
-        text.trim().length > 40 ||
-        /\b(would|should|suggest|recommend|think we|let's|i'd|my plan|first step|we need to)\b/i.test(
-          text
-        );
-
-      if (isDecision) {
-        incrementDecisionCount();
-        advanceStep();
-        const newDecisionCount = useAppStore.getState().decisionCount;
-
-        addDecision({
-          step: currentStep,
-          userAction: text.trim(),
-          aiSummary: text.trim().slice(0, 100),
-        });
-
-        if (newDecisionCount >= 5) {
-          setScreen("final-recommendation");
-          return;
-        }
-      }
-
-      const conversationHistory = useAppStore
-        .getState()
-        .messages.map(
-          (m) => `${m.role === "user" ? "User" : "Coach"}: ${m.content}`
-        )
-        .join("\n");
+      const turnCount = updatedMessages.filter((m) => m.role === "user").length;
 
       try {
-        const state = useAppStore.getState();
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: updatedMessages.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            currentStep: state.currentStep,
-            decisionCount: state.decisionCount,
-            conversationHistory,
-          }),
-        });
-
-        if (!res.ok) throw new Error("Chat request failed");
-
-        const reader = res.body?.getReader();
-        if (!reader) throw new Error("No reader");
-
-        const assistantId = String(msgIdRef.current++);
-        let assistantContent = "";
-
-        setDisplayMessages((prev) => [
-          ...prev,
-          { id: assistantId, role: "assistant", content: "" },
-        ]);
-
-        const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          assistantContent += chunk;
-          setDisplayMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId ? { ...m, content: assistantContent } : m
-            )
-          );
-        }
-
-        if (assistantContent) {
-          addMessage({
-            role: "assistant",
-            content: assistantContent,
-            timestamp: Date.now(),
-          });
-          addTranscript(`Coach: ${assistantContent}`);
-
-          const latestState = useAppStore.getState();
-          if (
-            latestState.decisionCount >= 4 &&
-            /final recommendation|what would you advise|one clear recommendation/i.test(
-              assistantContent
-            )
-          ) {
-            setTimeout(() => setScreen("final-recommendation"), 3000);
-          }
-        }
+        await streamChat(
+          updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+          turnCount
+        );
       } catch (err) {
         console.error("Chat error:", err);
       } finally {
         setIsLoading(false);
       }
     },
-    [
-      isLoading,
-      displayMessages,
-      currentStep,
-      addMessage,
-      addDecision,
-      advanceStep,
-      incrementDecisionCount,
-      addTranscript,
-      setScreen,
-    ]
+    [isLoading, displayMessages, addMessage, addTranscript, streamChat]
   );
 
   const handleSend = (text: string) => {
     sendMessage(text);
     setTextInput("");
   };
+
+  const userTurns = displayMessages.filter((m) => m.role === "user").length;
 
   return (
     <div className="h-dvh flex flex-col">
@@ -251,14 +172,14 @@ export function ChallengeScreen() {
           </div>
           <div className="min-w-0">
             <div className="font-medium text-sm text-navy">
-              The Jet Engine Claim
+              {scenario.title}
             </div>
             <div className="text-xs text-muted-foreground truncate">
-              {decisionCount} decision{decisionCount !== 1 ? "s" : ""} made
+              {userTurns} exchange{userTurns !== 1 ? "s" : ""}
             </div>
           </div>
         </div>
-        {decisionCount >= 4 && (
+        {userTurns >= 2 && (
           <Button
             variant="outline"
             size="sm"

@@ -11,48 +11,13 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-export interface UserDecision {
-  step: number;
-  userAction: string;
-  aiSummary: string;
-}
-
-export interface JudgmentScore {
-  clarifying: number;
-  evidence: number;
-  options: number;
-  risk: number;
-  judgment: number;
-  total: number;
-}
-
-export interface CommunicationScore {
-  clarity: number;
-  reasoning: number;
-  nuance: number;
-  total: number;
-}
-
 export interface ReportData {
   overallScore: number;
-  judgmentScore: JudgmentScore;
-  communicationScore: CommunicationScore;
-  scenarioSummary: string;
-  keyDecisions: { decision: string; impact: string }[];
-  judgmentBreakdown: {
-    dimension: string;
-    score: number;
-    maxScore: number;
-    whatYouDid: string;
-    whatYouMissed: string;
-  }[];
-  communicationBreakdown: {
-    aspect: string;
-    score: number;
-    maxScore: number;
-    observation: string;
-  }[];
-  recommendation: string;
+  whatYouDidWell: string[];
+  whatYouMissed: string[];
+  decisionPath: string[];
+  strongerApproach: string;
+  nextPracticeFocus: string;
 }
 
 export interface UserInfo {

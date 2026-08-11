@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import type { Screen, ChatMessage, UserDecision, ReportData, UserInfo } from "./types";
+import type { Screen, ChatMessage, ReportData, UserInfo } from "./types";
+import { DEFAULT_SCENARIO_ID } from "./scenarios";
 
 interface AuthUser {
   id: string;
@@ -12,10 +13,8 @@ interface AuthUser {
 
 interface AppStore {
   screen: Screen;
+  scenarioId: string;
   messages: ChatMessage[];
-  decisions: UserDecision[];
-  currentStep: number;
-  decisionCount: number;
   finalRecommendation: string | null;
   report: ReportData | null;
   userInfo: UserInfo | null;
@@ -24,10 +23,8 @@ interface AppStore {
   authUser: AuthUser | null;
 
   setScreen: (screen: Screen) => void;
+  setScenarioId: (id: string) => void;
   addMessage: (message: ChatMessage) => void;
-  addDecision: (decision: UserDecision) => void;
-  advanceStep: () => void;
-  incrementDecisionCount: () => void;
   setFinalRecommendation: (text: string) => void;
   setReport: (report: ReportData) => void;
   setUserInfo: (info: UserInfo) => void;
@@ -39,10 +36,8 @@ interface AppStore {
 
 export const useAppStore = create<AppStore>((set) => ({
   screen: "landing",
+  scenarioId: DEFAULT_SCENARIO_ID,
   messages: [],
-  decisions: [],
-  currentStep: 1,
-  decisionCount: 0,
   finalRecommendation: null,
   report: null,
   userInfo: null,
@@ -51,14 +46,9 @@ export const useAppStore = create<AppStore>((set) => ({
   authUser: null,
 
   setScreen: (screen) => set({ screen }),
+  setScenarioId: (scenarioId) => set({ scenarioId }),
   addMessage: (message) =>
     set((state) => ({ messages: [...state.messages, message] })),
-  addDecision: (decision) =>
-    set((state) => ({ decisions: [...state.decisions, decision] })),
-  advanceStep: () =>
-    set((state) => ({ currentStep: Math.min(state.currentStep + 1, 12) })),
-  incrementDecisionCount: () =>
-    set((state) => ({ decisionCount: state.decisionCount + 1 })),
   setFinalRecommendation: (text) => set({ finalRecommendation: text }),
   setReport: (report) => set({ report }),
   setUserInfo: (info) => set({ userInfo: info }),
@@ -71,10 +61,8 @@ export const useAppStore = create<AppStore>((set) => ({
   reset: () =>
     set({
       screen: "landing",
+      scenarioId: DEFAULT_SCENARIO_ID,
       messages: [],
-      decisions: [],
-      currentStep: 1,
-      decisionCount: 0,
       finalRecommendation: null,
       report: null,
       userInfo: null,
