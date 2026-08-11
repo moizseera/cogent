@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
+import { createClient } from "@/lib/supabase/client";
 
 const PRACTICE_CARDS = [
   {
@@ -9,7 +10,7 @@ const PRACTICE_CARDS = [
     description:
       "Your close friend says she built a 50% more efficient jet engine in her garage. She wants your help deciding what to do next.",
     difficulty: "Intermediate",
-    duration: "15-20 min",
+    duration: "~10 min",
     skills: ["Critical evaluation", "Risk assessment", "Decision-making"],
     available: true,
   },
@@ -53,6 +54,22 @@ const LESSON_CARDS = [
 
 export function LandingScreen() {
   const setScreen = useAppStore((s) => s.setScreen);
+  const authUser = useAppStore((s) => s.authUser);
+  const setAuthUser = useAppStore((s) => s.setAuthUser);
+
+  const handleSignIn = async () => {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+  };
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setAuthUser(null);
+  };
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -71,9 +88,34 @@ export function LandingScreen() {
             <button className="hover:text-foreground transition-colors">
               How it works
             </button>
-            <button className="text-blue hover:text-blue-hover transition-colors font-medium">
-              Sign in
-            </button>
+            {authUser ? (
+              <div className="flex items-center gap-3">
+                {authUser.avatar && (
+                  <img
+                    src={authUser.avatar}
+                    alt=""
+                    className="w-7 h-7 rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                <span className="text-foreground font-medium text-sm">
+                  {authUser.name?.split(" ")[0] || authUser.email.split("@")[0]}
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleSignIn}
+                className="text-blue hover:text-blue-hover transition-colors font-medium"
+              >
+                Sign in
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -118,7 +160,7 @@ export function LandingScreen() {
               </span>
               <span className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue" />
-                ~20 minutes
+                ~10 minutes
               </span>
             </div>
           </div>

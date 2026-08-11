@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
+import { createClient } from "@/lib/supabase/client";
 import type { ReportData } from "@/lib/types";
 
 function ScoreRing({
@@ -94,8 +95,11 @@ export function ReportScreen() {
     setIsLoading,
   } = useAppStore();
 
+  const authUser = useAppStore((s) => s.authUser);
   const [loading, setLoading] = useState(!report);
   const [activeSection, setActiveSection] = useState(0);
+  const [saved, setSaved] = useState(false);
+  const savedRef = useRef(false);
 
   useEffect(() => {
     if (report) return;
@@ -126,6 +130,29 @@ export function ReportScreen() {
 
     fetchReport();
   }, [allTranscripts, decisions, finalRecommendation, report, setReport, setIsLoading]);
+
+  useEffect(() => {
+    if (!report || !authUser || savedRef.current) return;
+    savedRef.current = true;
+
+    fetch("/api/reports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ report }),
+    })
+      .then((res) => {
+        if (res.ok) setSaved(true);
+      })
+      .catch(() => {});
+  }, [report, authUser]);
+
+  const handleSignIn = async () => {
+    const supabase = createClient();
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/` },
+    });
+  };
 
   if (loading) {
     return (
@@ -303,14 +330,45 @@ export function ReportScreen() {
           </div>
         )}
 
-        <div className="pt-4">
-          <Button
-            size="lg"
-            className="w-full bg-blue hover:bg-blue-hover text-white"
-            onClick={() => setScreen("info-collection")}
-          >
-            Save my results
-          </Button>
+        <div className="pt-4 space-y-3">
+          {authUser ? (
+            <>
+              {saved && (
+                <p className="text-center text-sm text-muted-foreground">
+                  Report saved to your account
+                </p>
+              )}
+              <Button
+                size="lg"
+                className="w-full bg-blue hover:bg-blue-hover text-white"
+                onClick={() => {
+                  useAppStore.getState().reset();
+                }}
+              >
+                Try another challenge
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="lg"
+                className="w-full bg-blue hover:bg-blue-hover text-white"
+                onClick={handleSignIn}
+              >
+                Sign in with Google to save
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  useAppStore.getState().reset();
+                }}
+              >
+                Skip — try another challenge
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

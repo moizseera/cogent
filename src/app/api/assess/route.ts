@@ -49,6 +49,34 @@ const reportSchema = z.object({
   recommendation: z.string(),
 });
 
+function buildFallbackReport(): z.infer<typeof reportSchema> {
+  return {
+    overallScore: 50,
+    judgmentScore: {
+      clarifying: 7, evidence: 7, options: 7, risk: 7, judgment: 7, total: 35,
+    },
+    communicationScore: { clarity: 5, reasoning: 5, nuance: 5, total: 15 },
+    scenarioSummary:
+      "The user engaged with the scenario but the detailed assessment could not be generated. Please try again.",
+    keyDecisions: [
+      { decision: "Engaged with the scenario", impact: "Showed willingness to think through the problem" },
+    ],
+    judgmentBreakdown: [
+      { dimension: "Clarifying the claim", score: 7, maxScore: 14, whatYouDid: "Engaged with the scenario", whatYouMissed: "Assessment unavailable" },
+      { dimension: "Examining evidence", score: 7, maxScore: 14, whatYouDid: "Engaged with the scenario", whatYouMissed: "Assessment unavailable" },
+      { dimension: "Generating options", score: 7, maxScore: 14, whatYouDid: "Engaged with the scenario", whatYouMissed: "Assessment unavailable" },
+      { dimension: "Assessing risk", score: 7, maxScore: 14, whatYouDid: "Engaged with the scenario", whatYouMissed: "Assessment unavailable" },
+      { dimension: "Making judgment calls", score: 7, maxScore: 14, whatYouDid: "Engaged with the scenario", whatYouMissed: "Assessment unavailable" },
+    ],
+    communicationBreakdown: [
+      { aspect: "Clarity", score: 5, maxScore: 10, observation: "Assessment unavailable" },
+      { aspect: "Reasoning quality", score: 5, maxScore: 10, observation: "Assessment unavailable" },
+      { aspect: "Nuance", score: 5, maxScore: 10, observation: "Assessment unavailable" },
+    ],
+    recommendation: "Try the exercise again for a full assessment of your critical thinking skills.",
+  };
+}
+
 export async function POST(req: Request) {
   const { type, transcripts, decisions, finalRecommendation } =
     await req.json();
@@ -62,10 +90,12 @@ export async function POST(req: Request) {
     .join("\n");
 
   if (type === "report") {
-    const { object } = await generateObject({
-      model: groq("llama-3.3-70b-versatile"),
-      schema: reportSchema,
-      prompt: `${REPORT_ASSESSMENT_PROMPT}
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const { object } = await generateObject({
+          model: groq("llama-3.3-70b-versatile"),
+          schema: reportSchema,
+          prompt: `${REPORT_ASSESSMENT_PROMPT}
 
 User transcripts:
 ${transcriptText}
@@ -83,8 +113,15 @@ Generate the complete report with accurate scores.
 - judgmentBreakdown must have exactly 5 items with maxScore 14 each
 - communicationBreakdown must have exactly 3 items with maxScore 10 each
 - keyDecisions should have 3-5 items`,
-    });
-    return Response.json(object);
+        });
+        return Response.json(object);
+      } catch (err) {
+        console.error(`Report generation attempt ${attempt + 1} failed:`, err);
+        if (attempt === 1) {
+          return Response.json(buildFallbackReport());
+        }
+      }
+    }
   }
 
   return Response.json({ error: "Unknown assessment type" }, { status: 400 });

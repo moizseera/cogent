@@ -145,7 +145,7 @@ export function ChallengeScreen() {
           aiSummary: text.trim().slice(0, 100),
         });
 
-        if (newDecisionCount >= 10) {
+        if (newDecisionCount >= 5) {
           setScreen("final-recommendation");
           return;
         }
@@ -210,7 +210,7 @@ export function ChallengeScreen() {
 
           const latestState = useAppStore.getState();
           if (
-            latestState.decisionCount >= 8 &&
+            latestState.decisionCount >= 4 &&
             /final recommendation|what would you advise|one clear recommendation/i.test(
               assistantContent
             )
@@ -258,7 +258,7 @@ export function ChallengeScreen() {
             </div>
           </div>
         </div>
-        {decisionCount >= 8 && (
+        {decisionCount >= 4 && (
           <Button
             variant="outline"
             size="sm"

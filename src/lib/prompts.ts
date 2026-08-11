@@ -106,21 +106,18 @@ export function buildNarratorSystemPrompt(
   if (decisionCount === 0 && currentStep === 1) {
     stageGuidance =
       "This is the very start. Present the scenario in third person and ask the user how they would respond.";
-  } else if (decisionCount >= 8) {
+  } else if (decisionCount >= 4) {
     stageGuidance =
-      "The user has made enough decisions. Start wrapping up. Present a moment where everything converges — perhaps an urgent deadline, a make-or-break meeting, or a critical choice. Say something like: 'Everything is coming to a head. If you had to give your friend one clear recommendation right now — what to do, in what order, and why — what would it be?'";
-  } else if (currentStep <= 3) {
+      "The user has made enough decisions. Wrap up now. Say: 'Everything is coming to a head — if you had to give your friend one clear recommendation right now, what would it be?'";
+  } else if (currentStep <= 2) {
     stageGuidance =
-      "Early phase: Focus on the claim itself. Help the user discover facts about measurement methods, equipment, and testing conditions through their questions.";
-  } else if (currentStep <= 6) {
+      "Early phase: The claim itself — measurement methods, equipment, testing conditions.";
+  } else if (currentStep <= 4) {
     stageGuidance =
-      "Middle phase: Introduce pressure and complications. She's getting impatient and wants to go public. Raise safety concerns and urgency.";
-  } else if (currentStep <= 9) {
-    stageGuidance =
-      "Late phase: External parties are getting involved. Introduce new stakeholders (potential investors, a university lab, a patent attorney). Raise the stakes.";
+      "Middle phase: She's getting impatient and wants to go public. Raise safety concerns and urgency.";
   } else {
     stageGuidance =
-      "Final phase: Everything is converging. Multiple competing interests, time pressure, and high stakes. Guide toward the final recommendation.";
+      "Late phase: Stakes are rising. New stakeholders, time pressure, competing interests.";
   }
 
   return `${SCENARIO_NARRATOR_SYSTEM}

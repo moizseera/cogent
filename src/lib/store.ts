@@ -3,6 +3,13 @@
 import { create } from "zustand";
 import type { Screen, ChatMessage, UserDecision, ReportData, UserInfo } from "./types";
 
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar: string | null;
+}
+
 interface AppStore {
   screen: Screen;
   messages: ChatMessage[];
@@ -14,6 +21,7 @@ interface AppStore {
   userInfo: UserInfo | null;
   allTranscripts: string[];
   isLoading: boolean;
+  authUser: AuthUser | null;
 
   setScreen: (screen: Screen) => void;
   addMessage: (message: ChatMessage) => void;
@@ -25,6 +33,7 @@ interface AppStore {
   setUserInfo: (info: UserInfo) => void;
   addTranscript: (transcript: string) => void;
   setIsLoading: (loading: boolean) => void;
+  setAuthUser: (user: AuthUser | null) => void;
   reset: () => void;
 }
 
@@ -39,6 +48,7 @@ export const useAppStore = create<AppStore>((set) => ({
   userInfo: null,
   allTranscripts: [],
   isLoading: false,
+  authUser: null,
 
   setScreen: (screen) => set({ screen }),
   addMessage: (message) =>
@@ -57,6 +67,7 @@ export const useAppStore = create<AppStore>((set) => ({
       allTranscripts: [...state.allTranscripts, transcript],
     })),
   setIsLoading: (loading) => set({ isLoading: loading }),
+  setAuthUser: (user) => set({ authUser: user }),
   reset: () =>
     set({
       screen: "landing",
