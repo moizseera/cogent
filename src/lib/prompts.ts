@@ -77,7 +77,7 @@ export function buildScenarioSystemPrompt(
   turnCount: number
 ): string {
   const softCapNote =
-    turnCount >= 10
+    turnCount >= 2
       ? "\n\nThe conversation has run long. Unless the user is clearly still making meaningful progress, converge now."
       : "";
 

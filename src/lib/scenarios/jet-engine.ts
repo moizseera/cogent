@@ -2,13 +2,13 @@ import type { ScenarioConfig } from "./types";
 
 export const JET_ENGINE_SCENARIO: ScenarioConfig = {
   id: "jet-engine-claim",
-  title: "The Jet Engine Claim",
+  title: "The Garage Jet Engine",
   userRole:
-    "A close friend of the inventor. She has called you for advice because she trusts you and has nobody else to turn to yet.",
+    "A close friend of the inventor. They have called you for advice because they trust you and have nobody else to turn to yet.",
   initialSituation:
-    "A close friend — quiet, unusually intelligent, not known for exaggerating — calls you, breathless with excitement. She says she has built a jet engine in her garage that is 50% more fuel-efficient than anything on the market, and she wants your help figuring out what to do next.",
+    "A close friend — quiet, unusually intelligent, not known for exaggerating — calls you, breathless with excitement. They say they've built a jet engine in their garage that is 50% more fuel-efficient than anything on the market, and they want your help figuring out what to do next.",
   context:
-    "The friend has been working alone in her garage for three years. She has an engineering background but not specifically in aerospace. She funded the project herself from savings. She has design files, notes, and video recordings of the engine running. She has not yet spoken to anyone else about it — no aviation expert, no patent attorney, no independent lab.",
+    "The friend has been working alone in their garage for three years. They have an engineering background but not specifically in aerospace. They funded the project themselves from savings. They have design files, notes, and video recordings of the engine running. They have not yet spoken to anyone else about it — no aviation expert, no patent attorney, no independent lab.",
   stakeholders: [
     "The friend (inventor) — trusts the user, wants validation and a path forward",
     "Potential independent testers or university labs — could verify or refute the claim",
@@ -16,13 +16,13 @@ export const JET_ENGINE_SCENARIO: ScenarioConfig = {
     "Potential investors or companies — could accelerate development, but introduce competing incentives",
   ],
   hiddenFacts: [
-    "Her efficiency claim compares fuel consumption against estimated thrust, not a controlled side-by-side test",
-    "She used garage-assembled measurement equipment, not calibrated lab equipment",
+    "Their efficiency claim compares fuel consumption against estimated thrust, not a controlled side-by-side test",
+    "They used garage-assembled measurement equipment, not calibrated lab equipment",
     "The engine has run for approximately 20 minutes in total, across all tests",
     "Some testing conditions were not documented consistently between runs",
-    "Her comparison baseline is published manufacturer specifications, not a live competing engine",
+    "Their comparison baseline is published manufacturer specifications, not a live competing engine",
     "Nobody independent has verified any part of the result",
-    "She wants to post a demonstration video online soon, before doing anything else",
+    "They want to post a demonstration video online soon, before doing anything else",
     "Further testing in the garage could be genuinely dangerous (fuel, heat, structural integrity, noise)",
   ],
   possibleDevelopments: [
@@ -34,7 +34,7 @@ export const JET_ENGINE_SCENARIO: ScenarioConfig = {
   ],
   constraints: [
     "The friend funded this alone and has limited money for professional testing or legal help",
-    "There is real time pressure — she is eager to move fast and go public",
+    "There is real time pressure — they are eager to move fast and go public",
     "Nothing about the claim has been independently verified yet",
   ],
   decisionAreas: [

@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Shantell_Sans } from "next/font/google";
 import { AuthProvider } from "@/components/AuthProvider";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const shantellSans = Shantell_Sans({
+  variable: "--font-handwritten",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -22,7 +28,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${inter.variable} ${shantellSans.variable} h-full antialiased`}
+    >
       <body className="min-h-dvh flex flex-col font-[family-name:var(--font-inter)]">
         <AuthProvider>{children}</AuthProvider>
       </body>

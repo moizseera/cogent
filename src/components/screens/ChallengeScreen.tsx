@@ -14,7 +14,7 @@ interface DisplayMessage {
   content: string;
 }
 
-const HARD_CAP_USER_TURNS = 12;
+const HARD_CAP_USER_TURNS = 3;
 
 export function ChallengeScreen() {
   const { messages: storeMessages, scenarioId, addMessage, setScreen, addTranscript } =
@@ -179,7 +179,7 @@ export function ChallengeScreen() {
             </div>
           </div>
         </div>
-        {userTurns >= 2 && (
+        {userTurns >= 1 && (
           <Button
             variant="outline"
             size="sm"

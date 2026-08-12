@@ -3,40 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/lib/store";
 import { createClient } from "@/lib/supabase/client";
-import { DEFAULT_SCENARIO_ID } from "@/lib/scenarios";
-
-const PRACTICE_CARDS = [
-  {
-    title: "The Jet Engine Claim",
-    description:
-      "Your close friend says she built a 50% more efficient jet engine in her garage. She wants your help deciding what to do next.",
-    difficulty: "Intermediate",
-    duration: "~10 min",
-    skills: ["Critical evaluation", "Risk assessment", "Decision-making"],
-    available: true,
-    scenarioId: DEFAULT_SCENARIO_ID,
-  },
-  {
-    title: "The Acquisition Offer",
-    description:
-      "Your startup just received a surprise acquisition offer. The board is split, and the deadline is 48 hours.",
-    difficulty: "Advanced",
-    duration: "20-25 min",
-    skills: ["Stakeholder management", "Negotiation", "Strategic thinking"],
-    available: false,
-    scenarioId: "",
-  },
-  {
-    title: "The Research Ethics Dilemma",
-    description:
-      "A colleague's groundbreaking paper has data inconsistencies. Reporting it could end their career. Ignoring it could harm patients.",
-    difficulty: "Advanced",
-    duration: "15-20 min",
-    skills: ["Ethical reasoning", "Evidence analysis", "Communication"],
-    available: false,
-    scenarioId: "",
-  },
-];
+import { DEFAULT_SCENARIO_ID, SCENARIO_CATALOG } from "@/lib/scenarios";
+import { ScenarioCard } from "@/components/ScenarioCard";
 
 const LESSON_CARDS = [
   {
@@ -170,7 +138,7 @@ export function LandingScreen() {
               </span>
               <span className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue" />
-                ~10 minutes
+                ~5 minutes
               </span>
             </div>
           </div>
@@ -221,59 +189,24 @@ export function LandingScreen() {
         </div>
       </section>
 
-      <section className="px-6 py-16 border-t border-border/50">
+      <section className="px-6 py-16 sm:py-20 border-t border-border/50">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-navy">Practice</h2>
-            <span className="text-sm text-muted-foreground">
-              {PRACTICE_CARDS.filter((c) => c.available).length} of{" "}
-              {PRACTICE_CARDS.length} available
-            </span>
+          <div className="text-center mb-10 sm:mb-12 space-y-3">
+            <h2 className="font-handwriting text-4xl sm:text-5xl text-ink">
+              What will you work on today?
+            </h2>
+            <p className="text-muted-foreground text-base">
+              A growing collection of real-world judgment problems — pick one
+              that looks interesting.
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {PRACTICE_CARDS.map((card) => (
-              <div
-                key={card.title}
-                className={`rounded-xl border p-6 space-y-4 transition-all ${
-                  card.available
-                    ? "border-border hover:border-blue/30 hover:shadow-md cursor-pointer"
-                    : "border-border/50 opacity-60"
-                }`}
-                onClick={() =>
-                  card.available && startChallenge(card.scenarioId)
-                }
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                      card.available
-                        ? "bg-blue-light text-blue"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {card.available ? card.difficulty : "Coming soon"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {card.duration}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-navy mb-1">{card.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {card.description}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {card.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {SCENARIO_CATALOG.map((entry) => (
+              <ScenarioCard
+                key={entry.title}
+                entry={entry}
+                onPractise={startChallenge}
+              />
             ))}
           </div>
         </div>
