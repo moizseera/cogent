@@ -55,7 +55,28 @@ export function FinalRecommendationScreen() {
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center px-6 py-12">
+    <div className="min-h-dvh flex flex-col">
+      <nav className="border-b border-border/50 px-6 py-4">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <button
+            onClick={() => useAppStore.getState().reset()}
+            className="text-xl font-semibold tracking-tight text-navy hover:opacity-80 transition-opacity"
+          >
+            Cogent
+          </button>
+          <button
+            onClick={() => setScreen("challenge")}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 12L2 8l4-4" />
+              <path d="M2 8h12" />
+            </svg>
+            Back to chat
+          </button>
+        </div>
+      </nav>
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
       <div className="max-w-lg w-full space-y-8">
         <div className="space-y-3">
           <div className="inline-flex items-center gap-2 text-xs font-medium text-blue bg-blue-light px-3 py-1.5 rounded-full">
@@ -151,6 +172,7 @@ export function FinalRecommendationScreen() {
             </div>
           </>
         )}
+      </div>
       </div>
     </div>
   );

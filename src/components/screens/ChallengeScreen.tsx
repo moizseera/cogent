@@ -167,9 +167,13 @@ export function ChallengeScreen() {
     <div className="h-dvh flex flex-col">
       <div className="border-b px-3 py-2 sm:px-4 sm:py-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue text-white flex items-center justify-center text-xs sm:text-sm font-semibold shrink-0">
+          <button
+            onClick={() => useAppStore.getState().reset()}
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue text-white flex items-center justify-center text-xs sm:text-sm font-semibold shrink-0 hover:bg-blue-hover transition-colors"
+            title="Back to home"
+          >
             C
-          </div>
+          </button>
           <div className="min-w-0">
             <div className="font-medium text-sm text-navy">
               {scenario.title}
@@ -179,17 +183,28 @@ export function ChallengeScreen() {
             </div>
           </div>
         </div>
-        {userTurns >= 1 && (
-          <Button
-            variant="outline"
-            size="sm"
-            className="shrink-0 text-xs sm:text-sm border-blue text-blue hover:bg-blue-light"
-            onClick={() => setScreen("final-recommendation")}
+        <div className="flex items-center gap-2">
+          {userTurns >= 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 text-xs sm:text-sm border-blue text-blue hover:bg-blue-light"
+              onClick={() => setScreen("final-recommendation")}
+            >
+              <span className="hidden sm:inline">Give final recommendation</span>
+              <span className="sm:hidden">Final rec</span>
+            </Button>
+          )}
+          <button
+            onClick={() => useAppStore.getState().reset()}
+            className="text-muted-foreground hover:text-foreground transition-colors p-1.5"
+            title="Exit to home"
           >
-            <span className="hidden sm:inline">Give final recommendation</span>
-            <span className="sm:hidden">Final rec</span>
-          </Button>
-        )}
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 14l-10-10M4 14L14 4" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div

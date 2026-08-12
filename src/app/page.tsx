@@ -6,6 +6,7 @@ import { ChallengeScreen } from "@/components/screens/ChallengeScreen";
 import { FinalRecommendationScreen } from "@/components/screens/FinalRecommendationScreen";
 import { ReportScreen } from "@/components/screens/ReportScreen";
 import { InfoCollectionScreen } from "@/components/screens/InfoCollectionScreen";
+import { MyReportsScreen } from "@/components/screens/MyReportsScreen";
 
 const screens = {
   landing: LandingScreen,
@@ -13,6 +14,7 @@ const screens = {
   "final-recommendation": FinalRecommendationScreen,
   report: ReportScreen,
   "info-collection": InfoCollectionScreen,
+  "my-reports": MyReportsScreen,
 } as const;
 
 export default function Home() {

@@ -145,7 +145,40 @@ export function ReportScreen() {
   if (!report) return null;
 
   return (
-    <div className="min-h-dvh px-6 py-8">
+    <div className="min-h-dvh flex flex-col">
+      <nav className="border-b border-border/50 px-6 py-4">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <button
+            onClick={() => useAppStore.getState().reset()}
+            className="text-xl font-semibold tracking-tight text-navy hover:opacity-80 transition-opacity"
+          >
+            Cogent
+          </button>
+          <div className="flex items-center gap-4 text-sm">
+            {authUser && (
+              <button
+                onClick={() => {
+                  useAppStore.getState().setScreen("my-reports");
+                }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                My Reports
+              </button>
+            )}
+            <button
+              onClick={() => useAppStore.getState().reset()}
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 8.5l5.5-5L13 8.5" />
+                <path d="M3.5 7.5V13h3.25v-3h2.5v3H12.5V7.5" />
+              </svg>
+              Home
+            </button>
+          </div>
+        </div>
+      </nav>
+      <div className="flex-1 px-6 py-8">
       <div className="max-w-2xl mx-auto space-y-10">
         <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-navy">Your Report</h1>
@@ -265,6 +298,7 @@ export function ReportScreen() {
             </>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

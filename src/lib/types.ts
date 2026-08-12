@@ -3,7 +3,8 @@ export type Screen =
   | "challenge"
   | "final-recommendation"
   | "report"
-  | "info-collection";
+  | "info-collection"
+  | "my-reports";
 
 export interface ChatMessage {
   role: "user" | "assistant";

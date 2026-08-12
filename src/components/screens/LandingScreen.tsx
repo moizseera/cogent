@@ -56,18 +56,28 @@ export function LandingScreen() {
           <div className="text-xl font-semibold tracking-tight text-navy">
             Cogent
           </div>
-          <div className="hidden sm:flex items-center gap-8 text-sm text-muted-foreground">
-            <button className="hover:text-foreground transition-colors">
-              Learn
-            </button>
-            <button className="hover:text-foreground transition-colors">
+          <div className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
+            <button
+              onClick={() => document.getElementById("practice-section")?.scrollIntoView({ behavior: "smooth" })}
+              className="hover:text-foreground transition-colors"
+            >
               Practice
             </button>
-            <button className="hover:text-foreground transition-colors">
-              How it works
+            <button
+              onClick={() => document.getElementById("learn-section")?.scrollIntoView({ behavior: "smooth" })}
+              className="hover:text-foreground transition-colors"
+            >
+              Learn
             </button>
             {authUser ? (
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setScreen("my-reports")}
+                  className="hover:text-foreground transition-colors"
+                >
+                  My Reports
+                </button>
+                <div className="w-px h-4 bg-border" />
                 {authUser.avatar && (
                   <img
                     src={authUser.avatar}
@@ -189,7 +199,7 @@ export function LandingScreen() {
         </div>
       </section>
 
-      <section className="px-6 py-16 sm:py-20 border-t border-border/50">
+      <section id="practice-section" className="px-6 py-16 sm:py-20 border-t border-border/50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12 space-y-3">
             <h2 className="font-handwriting text-4xl sm:text-5xl text-ink">
@@ -212,7 +222,7 @@ export function LandingScreen() {
         </div>
       </section>
 
-      <section className="px-6 py-16 bg-muted/30 border-t border-border/50">
+      <section id="learn-section" className="px-6 py-16 bg-muted/30 border-t border-border/50">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-navy">Learn</h2>
