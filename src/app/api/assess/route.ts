@@ -12,9 +12,17 @@ const reportSchema = z.object({
   whatYouDidWell: z.array(z.string()).length(3),
   whatYouMissed: z.array(z.string()).length(3),
   decisionPath: z.array(z.string()),
-  strongerApproach: z.string(),
+  strongerApproach: z.any(),
   nextPracticeFocus: z.string(),
 });
+
+function normalizeReport(raw: z.infer<typeof reportSchema>) {
+  let sa = raw.strongerApproach;
+  if (Array.isArray(sa)) sa = sa.join(" ");
+  else if (typeof sa === "object" && sa !== null) sa = sa.text ?? JSON.stringify(sa);
+  else if (typeof sa !== "string") sa = String(sa);
+  return { ...raw, strongerApproach: sa as string };
+}
 
 function buildFallbackReport(): z.infer<typeof reportSchema> {
   return {
@@ -64,7 +72,7 @@ ${transcriptText}
 FINAL RECOMMENDATION:
 ${finalRecommendation || "No final recommendation provided"}`,
       });
-      return Response.json(object);
+      return Response.json(normalizeReport(object));
     } catch (err) {
       console.error(`Report generation attempt ${attempt + 1} failed:`, err);
       if (attempt === 1) {
