@@ -57,4 +57,5 @@ export const JET_ENGINE_SCENARIO: ScenarioConfig = {
     "Sequencing — did the user reason about a sensible order of actions, not just a list of them?",
   ],
   difficulty: "intermediate",
+  chatImage: "/scenarios/jet-engine.jpg",
 };

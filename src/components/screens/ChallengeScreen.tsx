@@ -211,6 +211,15 @@ export function ChallengeScreen() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
       >
+        {scenario.chatImage && (
+          <div className="rounded-xl overflow-hidden border border-border/50 mb-2">
+            <img
+              src={scenario.chatImage}
+              alt={scenario.title}
+              className="w-full h-auto"
+            />
+          </div>
+        )}
         {displayMessages.map((message) => (
           <div
             key={message.id}

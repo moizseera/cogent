@@ -60,4 +60,5 @@ export const AMAZON_PHOTOS_SCENARIO: ScenarioConfig = {
     "Did the user distinguish speed of public response from speed of actual product response?",
   ],
   difficulty: "advanced",
+  chatImage: "/scenarios/amazon-photos.jpg",
 };

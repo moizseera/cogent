@@ -13,4 +13,5 @@ export interface ScenarioConfig {
   evaluationDimensions: string[];
   difficulty: "beginner" | "intermediate" | "advanced";
   rules?: string;
+  chatImage?: string;
 }
