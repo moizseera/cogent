@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const { object } = await generateObject({
-        model: groq("llama-3.3-70b-versatile"),
+        model: groq("openai/gpt-oss-120b"),
         schema: reportSchema,
         providerOptions: { groq: { structuredOutputs: false } },
         prompt: `${buildFinalAssessmentPrompt(scenario)}

@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const { userDecision } = await req.json();
 
   const { text } = await generateText({
-    model: groq("llama-3.3-70b-versatile"),
+    model: groq("openai/gpt-oss-120b"),
     prompt: `${FINAL_RECOMMENDATION_PROMPT}\n\nUser's words:\n"${userDecision}"`,
   });
 
